@@ -1,7 +1,7 @@
 
 BEGIN;
 -- first remove any data that may be present
-TRUNCATE noteful_folders, noteful_notes RESTART IDENTITY CASCADE;
+TRUNCATE noteful_folders, noteful_notes;
 
 
 INSERT INTO noteful_folders
