@@ -7,4 +7,4 @@ const knexInstance = knex({
     connection: process.env.DB_URL,
 })
 
-console.log(FolderService.getAllFolders())
+console.log(FolderService.getAllFolders(knexInstance))

@@ -20,31 +20,47 @@ describe(`Folders service object`, function() {
         },
     ]
 
-    before(() => {
+    before('make knex instance', () => {
         db = knex({
             client: 'pg',
             connection: process.env.TEST_DB_URL,
         })
     })
 
-    before(() => {
-        return db
-            .into('noteful_folders')
-            .insert(testFolders)
-    })
-
     after(() => db.destroy())
 
     before(() => db('noteful_folders').truncate())
 
+    afterEach(() => db('noteful_folders').truncate())
+
     describe(`getAllFolders()`, () => {
-        
-             it(`resolves all folders from 'noteful_folders' table`, () => {
-               // test that FolderService.getAllFolders gets data from table
-               return FolderService.getAllFolders(db)
+
+        context(`Given 'noteful_folders' has data`, () => {
+
+            beforeEach(() => {
+                return db
+                    .into('noteful_folders')
+                    .insert(testFolders)
+            })
+
+            it(`getAllFolders() resolves all folders from 'noteful_folders' table`, () => {
+                // test that FolderService.getAllFolders gets data from table
+                return FolderService.getAllFolders(db)
+                 .then(actual => {
+                     expect(actual).to.eql(testFolders)
+                 })
+            })
+
+        })
+
+        context(`Given 'noteful_folders' has no data`, () => {
+            it(`getAllFolders() resolves an empty array`, () => {
+            return FolderService.getAllFolders(db)
                 .then(actual => {
-                    expect(actual).to.eql(testFolders)
+                    expect(actual).to.eql([])
                 })
-             })
+            })
+        })
+        
     })
 })
