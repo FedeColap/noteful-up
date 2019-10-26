@@ -18,6 +18,10 @@ describe(`Folders service object`, function() {
             id: 3,
             f_name: 'Terzo'
         },
+        {
+            id: 4,
+            f_name: 'Quarto'
+        },
     ]
 
     before('make knex instance', () => {
@@ -54,13 +58,91 @@ describe(`Folders service object`, function() {
         })
 
         context(`Given 'noteful_folders' has no data`, () => {
+
             it(`getAllFolders() resolves an empty array`, () => {
             return FolderService.getAllFolders(db)
                 .then(actual => {
                     expect(actual).to.eql([])
                 })
             })
+
+            it(`insertFolder() inserts a new folder and resolves the new folder with an 'id'`, () => {
+                const newFolder = {
+                    f_name: 'Nuovo folder',
+                } 
+        
+                return FolderService.insertFolder(db, newFolder)
+                    .then(actual => {
+                        expect(actual).to.eql({
+                            id: 1,
+                            f_name: newFolder.f_name
+                        })
+                    })
+            })
+
         })
         
     })
+
+    
 })
+
+
+
+describe(`together they clash`, function() {
+    let db
+
+    let testFolders = [
+        {   
+            id: 1,
+            f_name: 'Primo'
+        },
+        {
+            id: 2,
+            f_name: 'Secondo'
+        },
+        {
+            id: 3,
+            f_name: 'Terzo'
+        },
+        {
+            id: 4,
+            f_name: 'Quarto'
+        },
+    ]
+
+    before('make knex instance', () => {
+        db = knex({
+            client: 'pg',
+            connection: process.env.TEST_DB_URL,
+        })
+    })
+
+    after(() => db.destroy())
+
+    before(() => db('noteful_folders').truncate())
+
+    afterEach(() => db('noteful_folders').truncate())
+    beforeEach(() => {
+        return db
+            .into('noteful_folders')
+            .insert(testFolders)
+    })
+    it(`getById() resolves a folder by id from 'noteful_folders' table`, () => {
+            
+    
+        const folderId = 3
+        const expectedFolder = testFolders[folderId - 1]
+        
+        return FolderService.getById(db, folderId)
+            
+            .then(actual => {
+                expect(actual).to.eql({
+                    id: folderId,
+                    f_name: expectedFolder.f_name
+                })
+            })
+    })
+})
+
+
