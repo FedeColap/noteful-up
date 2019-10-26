@@ -54,6 +54,16 @@ describe(`Folders service object`, function() {
                      expect(actual).to.eql(testFolders)
                  })
             })
+            it(`deleteFolder() removes a older by id from 'noteful_folders' table`, () => {
+                const folderId = 3
+                return FolderService.deleteFolder(db, folderId)
+                .then(() => FolderService.getAllFolders(db))
+                .then(allFolders => {
+                 // copy the test articles array without the "deleted" article
+                const expected = testFolders.filter(folder => folder.id !== folderId)
+                expect(allFolders).to.eql(expected)
+                })
+            })
 
         })
 
@@ -142,6 +152,21 @@ describe(`together they clash`, function() {
                     f_name: expectedFolder.f_name
                 })
             })
+    })
+
+    it(`updateFolder() updates an article from the 'noteful_folders' table`, () => {
+        const idOfFolderToUpdate = 3
+        const newFolderData = {
+            f_name: 'updated name',
+        }
+            return FolderService.updateFolder(db, idOfFolderToUpdate, newFolderData)
+               .then(() => FolderService.getById(db, idOfFolderToUpdate))
+               .then(folder => {
+                expect(folder).to.eql({
+                   id: idOfFolderToUpdate,
+                   ...newFolderData,
+                })
+               })
     })
 })
 
