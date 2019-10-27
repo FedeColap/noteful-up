@@ -1,5 +1,5 @@
 const knex = require('knex')
-const FolderService = require('../src/folder-service')
+const FolderService = require('../src/Folder/folder-service')
 
 describe(`Folders service object`, function() {
 
@@ -154,7 +154,7 @@ describe(`together they clash`, function() {
             })
     })
 
-    it(`updateFolder() updates an article from the 'noteful_folders' table`, () => {
+    it(`updateFolder() updates a folder from the 'noteful_folders' table`, () => {
         const idOfFolderToUpdate = 3
         const newFolderData = {
             f_name: 'updated name',
