@@ -23,8 +23,8 @@ app.get('/', (req, res) => {
 app.get('/folders', (req, res, next) => {
     const knexInstance = req.app.get('db')
     FolderService.getAllFolders(knexInstance)
-        .then(articles => {
-            res.json(articles)
+        .then(folders => {
+            res.json(folders)
         })
         .catch(next)
 })
