@@ -4,12 +4,20 @@ const xss = require('xss')
 const noteRouter = express.Router()
 const jsonParser = express.json()
 
+const serializeNote = note => ({
+    id: note.id,
+    n_name: xss(note.n_name),
+    folderid: note.folderid,
+    modified: note.modified,
+    content: xss(note.content)
+})
+
 noteRouter
     .route('/')
     .get((req, res, next) => {
         NoteService.getAllNotes(req.app.get('db'))
         .then(notes => {
-            res.json(notes)
+            res.json(notes.map(serializeNote))
         })
         .catch(next)
     })
