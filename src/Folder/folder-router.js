@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const FolderService = require('./folder-service')
 const xss = require('xss')
@@ -7,7 +8,7 @@ const jsonParser = express.json()
 const serializeFolder = folder => ({
     id: folder.id,
     f_name: xss(folder.f_name)
-  })
+})
 
 folderRouter
     .route('/')
@@ -35,7 +36,7 @@ folderRouter
         .then(folder => {
            res
             .status(201)
-            .location(`/folders/${folder.id}`)
+            .location(path.posix.join(req.originalUrl, `/${folder.id}`))
             .json(folder)
         })
         .catch(next)
@@ -81,6 +82,30 @@ folderRouter
             req.params.folder_id
         )
         .then(() => {
+            res.status(204).end()
+        })
+        .catch(next)
+    })
+    
+    .patch(jsonParser, (req, res, next) => {
+        const { f_name } = req.body
+        const folderToUpdate = { f_name }
+
+        const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length
+        if (numberOfValues === 0) {
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain  the name of the folder`
+                }
+            })
+        }
+            
+        FolderService.updateFolder(
+            req.app.get('db'),
+            req.params.folder_id,
+            folderToUpdate
+        )
+        .then(numRowsAffected => {
             res.status(204).end()
         })
         .catch(next)

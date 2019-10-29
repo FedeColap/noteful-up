@@ -1,3 +1,4 @@
+const path = require('path')
 const express = require('express')
 const NoteService = require('./note-service')
 const xss = require('xss')
@@ -38,7 +39,7 @@ noteRouter
         .then(note => {
            res
             .status(201)
-            .location(`/notes/${note.id}`)
+            .location(path.posix.join(req.originalUrl, `/${note.id}`))
             .json(note)
         })
         .catch(next)
@@ -82,6 +83,29 @@ noteRouter
             req.params.note_id
         )
         .then(() => {
+            res.status(204).end()
+        })
+        .catch(next)
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { n_name, folderid, content  } = req.body
+        const noteToUpdate = { n_name, folderid, content }
+
+        const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length
+        if (numberOfValues === 0) {
+            return res.status(400).json({
+                error: {
+                    message: `Request body must contain either 'name', 'folder' or 'content'`
+                }
+            })
+        }
+            
+        NoteService.updateNote(
+            req.app.get('db'),
+            req.params.note_id,
+            noteToUpdate
+        )
+        .then(numRowsAffected => {
             res.status(204).end()
         })
         .catch(next)
