@@ -114,6 +114,60 @@ describe('Notes Endpoints', function() {
                 )
                      
         })
+
+        const requiredFields = ['n_name', 'folderid', 'content']
+
+        requiredFields.forEach(field => {
+            const newNote = {
+                n_name: 'Nuova nota test',
+                folderid: 1,
+                content: 'Nuovo contenuto test'
+            }
+
+            it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+                delete newNote[field]
+
+                return supertest(app)
+                    .post('/notes')
+                    .send(newNote)
+                    .expect(400, {
+                        error: { message: `Missing '${field}' in request body` }
+                    })
+            })
+        })
+    })
+
+    describe.only(`DELETE /notes/:note_id`, () => {
+        context('Given there are notes in the database', () => {
+            const testNotes = makeNotesArray()
+        
+            beforeEach('insert notes', () => {
+                return db
+                    .into('noteful_notes')
+                    .insert(testNotes)
+            })
+        
+            it('responds with 204 and removes the note', () => {
+                const idToRemove = 2
+                const expectedNotes = testNotes.filter(note => note.id !== idToRemove)
+                return supertest(app)
+                    .delete(`/notes/${idToRemove}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/notes`)
+                            .expect(expectedNotes)
+                    )
+            })
+        })
+        context(`Given no notes`, () => {
+        it(`responds with 404`, () => {
+            const noteId = 123456
+            return supertest(app)
+                .delete(`/notes/${noteId}`)
+                .expect(404, { error: { message: `Note doesn't exist` } })
+        })
+        })
     })
 
 })

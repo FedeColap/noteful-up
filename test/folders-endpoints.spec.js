@@ -106,6 +106,50 @@ describe('Folders Endpoints', function() {
                 )
                      
         })
+
+        it(`responds with 400 and an error message when the 'f_name' is missing`, () => {
+            return supertest(app)
+                .post('/folders')
+                .send({
+                    f_name: null,
+                })
+                .expect(400, {
+                    error: { message: `Missing 'f_name' in request body` }
+                })
+        })
+    })
+
+    describe(`DELETE /folders/:folder_id`, () => {
+        context('Given there are folders in the database', () => {
+            const testFolders = makeFoldersArray()
+        
+            beforeEach('insert folders', () => {
+                return db
+                    .into('noteful_folders')
+                    .insert(testFolders)
+            })
+        
+            it('responds with 204 and removes the folder', () => {
+                const idToRemove = 2
+                const expectedFolders = testFolders.filter(folder => folder.id !== idToRemove)
+                return supertest(app)
+                    .delete(`/folders/${idToRemove}`)
+                    .expect(204)
+                    .then(res =>
+                        supertest(app)
+                            .get(`/folders`)
+                            .expect(expectedFolders)
+                    )
+            })
+        })
+        context(`Given no folders`, () => {
+        it(`responds with 404`, () => {
+            const folderId = 123456
+            return supertest(app)
+                .delete(`/folders/${folderId}`)
+                .expect(404, { error: { message: `Folder doesn't exist` } })
+        })
+        })
     })
     
 })
