@@ -1,6 +1,6 @@
 const express = require('express')
 const NoteService = require('./note-service')
-
+const xss = require('xss')
 const noteRouter = express.Router()
 const jsonParser = express.json()
 

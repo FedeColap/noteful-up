@@ -1,6 +1,6 @@
 const express = require('express')
 const FolderService = require('./folder-service')
-
+const xss = require('xss')
 const folderRouter = express.Router()
 const jsonParser = express.json()
 

@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
-const { makeFoldersArray } = require('./folders.fixtures.js')
+const { makeFoldersArray, makeMaliciousFolder } = require('./folders.fixtures.js')
  
 describe('Folders Endpoints', function() {
 
@@ -72,6 +72,24 @@ describe('Folders Endpoints', function() {
                 return supertest(app)
                     .get(`/folders/${folderId}`)
                     .expect(200, expectedFolder)
+            })
+        })
+        context(`Given an XSS attack folder`, () => {
+            const { maliciousFolder, expectedFolder } = makeMaliciousFolder()
+      
+            beforeEach('insert malicious folder', () => {
+              return db
+                .into('noteful_folders')
+                .insert([maliciousFolder])
+            })
+      
+            it('removes XSS attack content', () => {
+              return supertest(app)
+                .get(`/folders`)
+                .expect(200)
+                .expect(res => {
+                  expect(res.body[0].f_name).to.eql(expectedFolder.f_name)
+                })
             })
         })
 

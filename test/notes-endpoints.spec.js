@@ -1,7 +1,7 @@
 const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
-const { makeNotesArray } = require('./notes.fixtures.js')
+const { makeNotesArray, makeMaliciousNote } = require('./notes.fixtures.js')
 
 describe('Notes Endpoints', function() {
 
@@ -73,6 +73,25 @@ describe('Notes Endpoints', function() {
                     .expect(200, expectedNote)
             })
         })
+        context(`Given an XSS attack note`, () => {
+            const { maliciousNote, expectedNote } = makeMaliciousNote()
+      
+            beforeEach('insert malicious note', () => {
+              return db
+                .into('noteful_notes')
+                .insert([maliciousNote])
+            })
+      
+            it('removes XSS attack content', () => {
+              return supertest(app)
+                .get(`/notes`)
+                .expect(200)
+                .expect(res => {
+                  expect(res.body[0].n_name).to.eql(expectedNote.n_name)
+                  expect(res.body[0].content).to.eql(expectedNote.content)
+                })
+            })
+        })
 
         context(`Given no notes`, () => {
             it(`responds with 404`, () => {
@@ -137,7 +156,7 @@ describe('Notes Endpoints', function() {
         })
     })
 
-    describe.only(`DELETE /notes/:note_id`, () => {
+    describe(`DELETE /notes/:note_id`, () => {
         context('Given there are notes in the database', () => {
             const testNotes = makeNotesArray()
         
