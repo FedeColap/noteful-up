@@ -131,8 +131,11 @@ describe(`together they clash`, function() {
     after(() => db.destroy())
 
     before(() => db('noteful_folders').truncate())
+    
 
     afterEach(() => db('noteful_folders').truncate())
+    
+
     beforeEach(() => {
         return db
             .into('noteful_folders')
