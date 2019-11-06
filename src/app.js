@@ -18,7 +18,17 @@ app.use(cors())
 app.use('/api/folders', folderRouter)
 app.use('/api/notes', noteRouter)
 
+app.use((error, req, res, next) => {
+    let response
+    if (process.env.NODE_ENV === 'production') {
+      response = { error: { message: 'server error' }}
+    } else {
+      response = { error }
+    }
+    res.status(500).json(response)
+})
 
+//I believe is this who gives me problems in the main page (the url doesn't end with /)
 app.get('/', (req, res) => {
     res.send('Fede, Speranza e Carita')
 })
